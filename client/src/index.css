@@ -797,7 +797,10 @@ body {
 
 /* Wait Section */
 .display__wait-section {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Offline Overlay */
@@ -838,11 +841,6 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 .display__wait-value {
