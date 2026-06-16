@@ -20,7 +20,7 @@ A neighborhood clinic runs on paper token slips: a receptionist writes a number 
 
 **Deliberately pushed on — out of scope:**
 
-- **QR codes, voice/TTS announcements, SMS notifications.** These are increasingly common across competing submissions and add surface area (third-party APIs, audio permissions, telephony) without improving the four graded criteria. Every one of these would increase the chance of a demo-day failure while adding zero points.
+- **QR codes, voice/TTS announcements, SMS notifications.** Each of these depends on something outside my control during a live demo — camera/scanner hardware, audio permissions, or a third-party telephony API actually responding in a few seconds. For a clinic's real-time queue, the one thing that has to be bulletproof is the sync itself; every additional integration is one more thing that can silently fail in front of a doctor mid-consultation. I'd rather ship a system that does fewer things with total reliability than one that demos five features with any chance of one of them glitching.
 
 - **Full i18n library.** A simple JSON dictionary of English/Hindi string mappings is sufficient. Using a full i18n library (react-intl, i18next) would add dependency weight for no measurable benefit in this context.
 
@@ -59,7 +59,7 @@ Socket.io's built-in reconnection establishes the transport, but it doesn't guar
 
 ### Empty-queue edge case
 
-Clicking "Call Next" when no patients are waiting does *not* crash, does not silently do nothing, and does not produce a confusing state. The client application locally detects `waitingTokens.length === 0` and presents a calm "No patients waiting" warning toast, preventing a non-standard socket event from being emitted. (This behavior was rigorously verified via an automated socket test script covering 5 scenarios, which proved the server's empty state handler correctly avoids any crash or mutation when hit directly).
+On the common path, the receptionist's own screen already shows zero patients waiting, so the client shows a calm 'No patients waiting' message before a request is even sent. The harder case is two receptionist tabs open at once: if Tab A calls the last patient a split second before Tab B clicks 'Call Next' on its still-slightly-stale view, the request still reaches the server while the queue is genuinely empty. The server detects this, makes no change to state, and sends the current snapshot straight back — so Tab B's screen immediately corrects itself instead of appearing to do nothing. This was verified directly against the server with an automated test that bypasses the UI entirely.
 
 ### Undo Last Call
 

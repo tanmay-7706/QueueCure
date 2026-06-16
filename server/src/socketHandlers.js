@@ -41,8 +41,8 @@ function registerHandlers(io, socket) {
     }
 
     if (result.emptyQueue) {
-      // Still broadcast state for consistency
-      io.emit('queue:update', result.snapshot);
+      // Still broadcast state for consistency back to the requesting client
+      socket.emit('queue:update', result.snapshot);
       return;
     }
 
