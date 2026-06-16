@@ -11,7 +11,8 @@
  * - Connection status indicator
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { useQueueSocket } from '../hooks/useQueueSocket';
 import Toast from '../components/Toast';
 import QueueList from '../components/QueueList';
@@ -63,6 +64,20 @@ export default function ReceptionistView() {
   const waitingCount = queueState?.waitingTokens?.length ?? 0;
   const currentToken = queueState?.currentToken;
   const canUndo = queueState?.canUndo ?? false;
+  
+  const prevWaitingCountRef = useRef(0);
+
+  useEffect(() => {
+    // If the queue was not empty, and now it is, trigger confetti!
+    if (prevWaitingCountRef.current > 0 && waitingCount === 0) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+    prevWaitingCountRef.current = waitingCount;
+  }, [waitingCount]);
 
   return (
     <div className="receptionist">

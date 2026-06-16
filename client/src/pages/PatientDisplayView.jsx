@@ -21,7 +21,14 @@ export default function PatientDisplayView() {
   const [lang, setLang] = useState('en');
   const [isPulsing, setIsPulsing] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const prevTokenRef = useRef(null);
+
+  // Live Digital Clock
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Simple synthesized chime
   const playChime = useCallback(() => {
@@ -98,6 +105,9 @@ export default function PatientDisplayView() {
           </h1>
         </div>
         <div className="display__header-right">
+          <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginRight: '1rem', letterSpacing: '0.05em' }}>
+            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
           {!audioEnabled && (
             <button 
               className="btn btn--secondary" 
