@@ -32,6 +32,11 @@ const io = new Server(server, {
   },
 });
 
+// ── Root endpoint ──
+app.get('/', (_req, res) => {
+  res.send('🏥 Queue Cure API is running gracefully.');
+});
+
 // ── Health check endpoint ──
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
