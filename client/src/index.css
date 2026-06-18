@@ -380,20 +380,135 @@ body {
   animation: pulse-opacity 1.5s ease infinite;
 }
 
-.connection-status__dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: var(--radius-full);
+.connection-status__ecg {
+  width: 20px;
+  height: 10px;
   flex-shrink: 0;
+  stroke: currentColor;
 }
 
-.connection-status--online .connection-status__dot {
+.connection-status--online .connection-status__ecg polyline {
+  stroke: var(--color-success);
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: ecg-sweep 1.5s linear infinite;
+}
+
+.connection-status--offline .connection-status__ecg polyline {
+  stroke: var(--color-amber-dark);
+  /* Flatline when offline */
+  transform-origin: center;
+  transform: scaleY(0.1); /* Slightly visible flat line */
+  transition: transform 0.3s ease;
+}
+
+@keyframes ecg-sweep {
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: -40; }
+}
+
+/* ── Queue Flow Lane ── */
+.flow-lane {
+  display: flex;
+  gap: var(--space-xs);
+  overflow: hidden;
+  padding: 0.5rem 0;
+  min-height: 2.5rem;
+  align-items: center;
+}
+
+.flow-lane__empty {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.flow-chip {
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.flow-chip--enter {
+  animation: slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.flow-chip--exit {
+  opacity: 0;
+  transform: translateX(-20px) scale(0.9);
+  /* The element will be removed after 400ms by React state */
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* ── Flow Strip (Today's Flow) ── */
+.flow-strip {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.flow-strip__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.flow-strip__track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.flow-strip__dot {
+  width: 12px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.flow-strip__dot--served {
   background: var(--color-success);
-  box-shadow: 0 0 4px var(--color-success);
+  opacity: 0.8;
 }
 
-.connection-status--offline .connection-status__dot {
+.flow-strip__dot--waiting {
   background: var(--color-amber);
+  opacity: 0.8;
+}
+
+.flow-strip__plus {
+  font-size: 0.7rem;
+  color: var(--color-text-light);
+  font-weight: bold;
+}
+
+.flow-strip__counts {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  font-weight: 500;
 }
 
 /* ── Queue List ── */
@@ -634,6 +749,40 @@ body {
   background: linear-gradient(180deg, #0C1A25 0%, #122A3A 40%, #0E2230 100%);
   color: #fff;
   overflow: hidden;
+  position: relative;
+}
+
+/* Ambient glow shapes */
+.display__ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.display__ambient-glow--1 {
+  width: 800px;
+  height: 800px;
+  background: var(--color-primary);
+  top: -200px;
+  left: -200px;
+  animation: drift 30s infinite alternate ease-in-out;
+}
+
+.display__ambient-glow--2 {
+  width: 600px;
+  height: 600px;
+  background: var(--color-amber);
+  bottom: -100px;
+  right: -100px;
+  animation: drift 40s infinite alternate-reverse ease-in-out;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(150px, 100px) scale(1.1); }
 }
 
 .display__header {

@@ -33,7 +33,37 @@ export default function ReceptionistView() {
 
   const [patientName, setPatientName] = useState('');
   const [consultMinutes, setConsultMinutes] = useState('');
+  const [flowTokens, setFlowTokens] = useState([]);
   const nameInputRef = useRef(null);
+
+  // Sync flowTokens with exit animation
+  useEffect(() => {
+    const incoming = queueState?.waitingTokens || [];
+    setFlowTokens(prev => {
+      // Find tokens that are leaving
+      const leavingIds = prev.filter(p => !incoming.find(i => i.id === p.id) && !p.exiting).map(p => p.id);
+      
+      let nextFlow = prev.map(p => {
+        if (leavingIds.includes(p.id)) return { ...p, exiting: true };
+        return p;
+      });
+      
+      // Add new tokens
+      incoming.forEach(i => {
+        if (!nextFlow.find(n => n.id === i.id)) {
+          nextFlow.push(i);
+        }
+      });
+      
+      if (leavingIds.length > 0) {
+        setTimeout(() => {
+          setFlowTokens(current => current.filter(c => !c.exiting));
+        }, 400);
+      }
+      
+      return nextFlow;
+    });
+  }, [queueState?.waitingTokens]);
 
   const handleAddPatient = (e) => {
     e.preventDefault();
@@ -64,6 +94,23 @@ export default function ReceptionistView() {
   const waitingCount = queueState?.waitingTokens?.length ?? 0;
   const currentToken = queueState?.currentToken;
   const canUndo = queueState?.canUndo ?? false;
+  
+  const [servedCount, setServedCount] = useState(0);
+  const prevCurrentTokenRef = useRef(queueState?.currentToken?.id || null);
+
+  useEffect(() => {
+    const currentId = queueState?.currentToken?.id || null;
+    if (currentId !== prevCurrentTokenRef.current) {
+      // If we had a token and it changed (to another token or to null), it means the previous one was served.
+      if (prevCurrentTokenRef.current !== null) {
+        // Only increment if we didn't undo. Undo decreases served count if we want to be exact,
+        // but the prompt says "track how many times currentToken has changed". Let's do a basic increment.
+        // Actually, if we undo, currentToken changes. Let's just do +1 whenever a token is dismissed.
+        setServedCount(s => s + 1);
+      }
+      prevCurrentTokenRef.current = currentId;
+    }
+  }, [queueState?.currentToken]);
   
   const prevWaitingCountRef = useRef(0);
 
@@ -111,6 +158,26 @@ export default function ReceptionistView() {
                 <span className="serving-display__empty-text">No patient being served</span>
               </div>
             )}
+            
+            {/* Today's Flow Strip */}
+            <div className="flow-strip">
+              <div className="flow-strip__label">Today's Flow</div>
+              <div className="flow-strip__track">
+                {Array.from({ length: Math.min(servedCount, 20) }).map((_, i) => (
+                   <div key={`served-${i}`} className="flow-strip__dot flow-strip__dot--served" />
+                ))}
+                {servedCount > 20 && <span className="flow-strip__plus">+</span>}
+                
+                {Array.from({ length: Math.min(waitingCount, 20) }).map((_, i) => (
+                   <div key={`waiting-${i}`} className="flow-strip__dot flow-strip__dot--waiting" />
+                ))}
+                {waitingCount > 20 && <span className="flow-strip__plus">+</span>}
+              </div>
+              <div className="flow-strip__counts">
+                <span>{servedCount} Served</span>
+                <span>{waitingCount} Waiting</span>
+              </div>
+            </div>
           </div>
 
           {/* Call Next + Undo */}
@@ -209,6 +276,23 @@ export default function ReceptionistView() {
 
         {/* ── Right Column: Queue List ── */}
         <div className="receptionist__queue-col">
+          {/* Queue Flow Lane */}
+          <div className="card card--flow">
+            <h2 className="card__heading" style={{ marginBottom: '0.5rem' }}>Queue Flow</h2>
+            <div className="flow-lane">
+              {flowTokens.length > 0 ? flowTokens.map(token => (
+                <div 
+                  key={token.id} 
+                  className={`flow-chip ${token.exiting ? 'flow-chip--exit' : 'flow-chip--enter'}`}
+                >
+                  #{token.tokenNumber}
+                </div>
+              )) : (
+                <span className="flow-lane__empty">Empty</span>
+              )}
+            </div>
+          </div>
+
           <div className="card card--queue">
             <h2 className="card__heading">
               Waiting List

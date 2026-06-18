@@ -10,8 +10,7 @@
  * - Pure socket push — no polling, no timers
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import QRCode from 'react-qr-code';
+import { useState, useEffect, useRef } from 'react';
 import { useQueueSocket } from '../hooks/useQueueSocket';
 import ConnectionStatus from '../components/ConnectionStatus';
 import { t } from '../lib/i18n';
@@ -20,7 +19,6 @@ export default function PatientDisplayView() {
   const { queueState, isConnected } = useQueueSocket();
   const [lang, setLang] = useState('en');
   const [isPulsing, setIsPulsing] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const prevTokenRef = useRef(null);
 
@@ -30,60 +28,16 @@ export default function PatientDisplayView() {
     return () => clearInterval(timer);
   }, []);
 
-  // Simple synthesized chime
-  const playChime = useCallback(() => {
-    if (!audioEnabled) return;
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.type = 'sine';
-      // Ding
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
-      // Dong
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.2); // C5
-      gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 1);
-    } catch (e) {
-      console.warn("AudioContext failed:", e);
-    }
-  }, [audioEnabled]);
-
-  const announceToken = useCallback((token) => {
-    if (!audioEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); // Cancel any ongoing speech
-    
-    let text = "";
-    if (lang === 'en') {
-      text = `Token number ${token.tokenNumber}, ${token.name}, please proceed.`;
-    } else {
-      // Very basic phonetic Hindi phrase for English TTS engines
-      text = `Token number ${token.tokenNumber}, ${token.name}, kripaya aage badhein.`;
-    }
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    // Add a slight delay to let the chime finish
-    setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-    }, 1000);
-  }, [audioEnabled, lang]);
-
-  // Pulse animation & Audio announcement when current token changes
+  // Pulse animation when current token changes
   useEffect(() => {
     const currentTokenNum = queueState?.currentToken?.tokenNumber;
     if (prevTokenRef.current !== null && currentTokenNum !== prevTokenRef.current && queueState?.currentToken) {
       setIsPulsing(true);
-      playChime();
-      announceToken(queueState.currentToken);
       const timer = setTimeout(() => setIsPulsing(false), 600);
       return () => clearTimeout(timer);
     }
     prevTokenRef.current = currentTokenNum ?? null;
-  }, [queueState?.currentToken, playChime, announceToken]);
+  }, [queueState?.currentToken]);
 
   const toggleLang = () => {
     setLang((prev) => (prev === 'en' ? 'hi' : 'en'));
@@ -96,6 +50,10 @@ export default function PatientDisplayView() {
 
   return (
     <div className="display">
+      {/* Ambient background glows */}
+      <div className="display__ambient-glow display__ambient-glow--1" />
+      <div className="display__ambient-glow display__ambient-glow--2" />
+
       {/* ── Header Bar ── */}
       <header className="display__header">
         <div className="display__header-left">
@@ -108,15 +66,6 @@ export default function PatientDisplayView() {
           <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginRight: '1rem', letterSpacing: '0.05em' }}>
             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
-          {!audioEnabled && (
-            <button 
-              className="btn btn--secondary" 
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem' }}
-              onClick={() => setAudioEnabled(true)}
-            >
-              🔊 Enable Audio
-            </button>
-          )}
           <ConnectionStatus isConnected={isConnected} />
           <button
             id="btn-lang-toggle"
@@ -175,14 +124,6 @@ export default function PatientDisplayView() {
             <p className="display__wait-count">
               {waitingTokens.length} {t(lang, 'patientsWaiting')}
             </p>
-          </section>
-
-          {/* QR Code */}
-          <section className="display__qr-section" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-             <h2 className="display__label">Track on Mobile</h2>
-             <div style={{ background: 'white', padding: '10px', borderRadius: '12px' }}>
-                <QRCode value={window.location.href} size={100} />
-             </div>
           </section>
         </div>
       </main>
