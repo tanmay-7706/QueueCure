@@ -11,10 +11,7 @@ services:
       - key: PORT
         value: 3001
       - key: CLIENT_URL
-        fromService:
-          type: web
-          name: queue-cure-client
-          property: url
+        sync: false
 
   - type: web
     name: queue-cure-client
@@ -24,7 +21,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_SERVER_URL
-        fromService:
-          type: web
-          name: queue-cure-server
-          property: url
+        sync: false
