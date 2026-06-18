@@ -75,10 +75,17 @@ export default function ReceptionistView() {
   };
 
   const handleCallNext = () => {
+    const hasNextPatient = (queueState?.waitingTokens?.length ?? 0) > 0;
+    if (queueState?.currentToken && hasNextPatient) {
+      setServedCount((s) => s + 1);
+    }
     callNext();
   };
 
   const handleUndo = () => {
+    if (queueState?.canUndo) {
+      setServedCount((s) => Math.max(0, s - 1));
+    }
     undoLastCall();
   };
 
@@ -96,21 +103,6 @@ export default function ReceptionistView() {
   const canUndo = queueState?.canUndo ?? false;
   
   const [servedCount, setServedCount] = useState(0);
-  const prevCurrentTokenRef = useRef(queueState?.currentToken?.id || null);
-
-  useEffect(() => {
-    const currentId = queueState?.currentToken?.id || null;
-    if (currentId !== prevCurrentTokenRef.current) {
-      // If we had a token and it changed (to another token or to null), it means the previous one was served.
-      if (prevCurrentTokenRef.current !== null) {
-        // Only increment if we didn't undo. Undo decreases served count if we want to be exact,
-        // but the prompt says "track how many times currentToken has changed". Let's do a basic increment.
-        // Actually, if we undo, currentToken changes. Let's just do +1 whenever a token is dismissed.
-        setServedCount(s => s + 1);
-      }
-      prevCurrentTokenRef.current = currentId;
-    }
-  }, [queueState?.currentToken]);
   
   const prevWaitingCountRef = useRef(0);
 
