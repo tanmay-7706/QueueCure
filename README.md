@@ -13,6 +13,13 @@ Both screens update instantly via WebSocket push — zero page refreshes, zero p
 
 ---
 
+## Live Demo
+
+- **Receptionist Console & Patient Display (Frontend):** [https://queue-cure-silk.vercel.app](https://queue-cure-silk.vercel.app)
+- **API Server (Backend):** [https://queuecure-6xlh.onrender.com](https://queuecure-6xlh.onrender.com)
+
+---
+
 ## Tech Stack
 
 - **Frontend:** React 18 + Vite, plain CSS (CSS variables for theming)
