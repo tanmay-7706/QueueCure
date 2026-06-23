@@ -13,42 +13,45 @@
 
 /* ── CSS Variables ── */
 :root {
-  /* Primary palette */
-  --color-primary: #0F9D8C;
+  /* ── Clay Canvas ── */
+  --color-bg: #F4F1FA;
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-surface-hover: rgba(255, 255, 255, 0.9);
+  --color-border: rgba(255, 255, 255, 0.6);
+  --color-border-light: rgba(255, 255, 255, 0.4);
+
+  /* ── Text ── */
+  --color-text: #332F3A;
+  --color-text-secondary: #635F69;
+  --color-text-muted: #8B879A;
+
+  /* ── Primary (Teal — keep healthcare identity) ── */
+  --color-primary: #0D9488;
   --color-primary-light: #14B8A6;
-  --color-primary-dark: #0D7D6F;
-  --color-primary-bg: #E6F7F5;
-  --color-primary-glow: rgba(15, 157, 140, 0.15);
+  --color-primary-dark: #0F766E;
+  --color-primary-bg: rgba(13, 148, 136, 0.08);
+  --color-primary-glow: rgba(13, 148, 136, 0.25);
 
-  /* Amber — waiting states */
-  --color-amber: #E5A532;
-  --color-amber-light: #F5C563;
-  --color-amber-bg: #FFF8EB;
-  --color-amber-dark: #C48B1E;
+  /* ── Accent (Violet — for depth and visual interest) ── */
+  --color-accent: #7C3AED;
+  --color-accent-light: #A78BFA;
 
-  /* Coral — errors only */
-  --color-error: #D46B6B;
-  --color-error-light: #E88C8C;
-  --color-error-bg: #FFF0F0;
+  /* ── Semantic ── */
+  --color-amber: #F59E0B;
+  --color-amber-light: #FCD34D;
+  --color-amber-bg: rgba(245, 158, 11, 0.1);
+  --color-amber-dark: #D97706;
+  --color-error: #DC2626;
+  --color-error-light: #EF4444;
+  --color-error-bg: rgba(220, 38, 38, 0.08);
+  --color-success: #10B981;
+  --color-success-bg: rgba(16, 185, 129, 0.08);
 
-  /* Success */
-  --color-success: #2EAA6F;
-  --color-success-bg: #E8F8F0;
+  /* ── Typography ── */
+  --font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Nunito', 'DM Sans', system-ui, sans-serif;
 
-  /* Neutrals */
-  --color-bg: #F5F6F8;
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F9FAFB;
-  --color-border: #E5E7EB;
-  --color-border-light: #F0F1F3;
-  --color-text: #1A2332;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
-
-  /* Typography */
-  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-  /* Spacing */
+  /* ── Spacing ── */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -56,23 +59,60 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
 
-  /* Radii */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-full: 50%;
+  /* ── Clay Border Radii (aggressive rounding is essential) ── */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --radius-2xl: 48px;
+  --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 20px var(--color-primary-glow);
+  /* ── Clay Shadow Stack ──
+     Each shadow has 4 layers: ambient drop, top-left highlight, inner bounce, inner rim */
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease;
-  --transition-slow: 300ms ease;
+  /* Small interactive elements (buttons, badges) */
+  --shadow-clay-btn:
+    8px 8px 16px rgba(124, 58, 237, 0.18),
+    -5px -5px 12px rgba(255, 255, 255, 0.8),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+    inset -3px -3px 6px rgba(0, 0, 0, 0.08);
+
+  /* Standard cards */
+  --shadow-clay-card:
+    12px 12px 28px rgba(160, 150, 180, 0.18),
+    -8px -8px 20px rgba(255, 255, 255, 0.92),
+    inset 4px 4px 10px rgba(124, 58, 237, 0.03),
+    inset -4px -4px 10px rgba(255, 255, 255, 1);
+
+  /* Hover state for cards (deeper lift) */
+  --shadow-clay-card-hover:
+    18px 18px 36px rgba(160, 150, 180, 0.25),
+    -10px -10px 24px rgba(255, 255, 255, 1),
+    inset 4px 4px 10px rgba(124, 58, 237, 0.04),
+    inset -4px -4px 10px rgba(255, 255, 255, 1);
+
+  /* Recessed / pressed (inputs, active button state) */
+  --shadow-clay-pressed:
+    inset 8px 8px 16px #d9d4e3,
+    inset -8px -8px 16px #ffffff;
+
+  /* Primary teal button */
+  --shadow-clay-primary:
+    8px 8px 20px rgba(13, 148, 136, 0.28),
+    -5px -5px 12px rgba(255, 255, 255, 0.5),
+    inset 3px 3px 8px rgba(255, 255, 255, 0.3),
+    inset -3px -3px 8px rgba(0, 0, 0, 0.1);
+
+  /* Legacy aliases — keeps existing component CSS working */
+  --shadow-sm: var(--shadow-clay-btn);
+  --shadow-md: var(--shadow-clay-card);
+  --shadow-lg: var(--shadow-clay-card-hover);
+  --shadow-glow: 0 0 24px var(--color-primary-glow);
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-normal: 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-slow: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── Reset ── */
@@ -92,10 +132,20 @@ html {
 
 body {
   font-family: var(--font-family);
-  background: var(--color-bg);
+  background-color: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.card__label,
+.token-number,
+.nav__title,
+.stat-label,
+.section-title {
+  font-family: var(--font-heading);
 }
 
 #root {
@@ -1144,5 +1194,158 @@ body {
 
   .display__wait-count {
     font-size: 1rem;
+  }
+}
+
+/* ────────────────────────────────────────────
+   CLAY ANIMATIONS
+──────────────────────────────────────────── */
+
+@keyframes clay-blob-drift {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  33%       { transform: translateY(-24px) rotate(3deg) scale(1.02); }
+  66%       { transform: translateY(-12px) rotate(-2deg) scale(0.98); }
+}
+
+@keyframes clay-blob-drift-alt {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  33%       { transform: translateY(-16px) rotate(-3deg) scale(1.03); }
+  66%       { transform: translateY(-30px) rotate(2deg) scale(0.97); }
+}
+
+@keyframes clay-blob-drift-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-20px) rotate(5deg); }
+}
+
+@keyframes clay-breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.025); }
+}
+
+/* Canvas blob containers */
+.clay-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.clay-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: 0.55;
+}
+
+.clay-blob--teal {
+  width: 55vw;
+  height: 55vw;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%);
+  top: -15%;
+  left: -10%;
+  animation: clay-blob-drift 14s ease-in-out infinite;
+}
+
+.clay-blob--violet {
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  top: 20%;
+  right: -12%;
+  animation: clay-blob-drift-alt 18s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+.clay-blob--amber {
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+  bottom: -10%;
+  left: 30%;
+  animation: clay-blob-drift-slow 22s ease-in-out infinite;
+  animation-delay: -8s;
+}
+
+/* Clay card base — apply to all .card elements */
+.card {
+  background: var(--color-surface) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-clay-card) !important;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-clay-card-hover) !important;
+}
+
+/* Clay primary button squish */
+.btn-primary,
+.btn-call-next {
+  box-shadow: var(--shadow-clay-primary) !important;
+  border-radius: var(--radius-full) !important;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-primary:hover,
+.btn-call-next:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    10px 10px 24px rgba(13, 148, 136, 0.32),
+    -6px -6px 14px rgba(255, 255, 255, 0.6),
+    inset 3px 3px 8px rgba(255, 255, 255, 0.35),
+    inset -3px -3px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-primary:active,
+.btn-call-next:active {
+  transform: scale(0.95) translateY(0px);
+  box-shadow: var(--shadow-clay-pressed) !important;
+}
+
+/* Clay input recessed style */
+input[type="text"],
+input[type="number"],
+.input-clay {
+  background: #EFEBF5 !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-clay-pressed) !important;
+  transition: box-shadow var(--transition-normal), background var(--transition-normal);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+.input-clay:focus {
+  background: #ffffff !important;
+  box-shadow:
+    var(--shadow-clay-card),
+    0 0 0 3px rgba(13, 148, 136, 0.2) !important;
+  outline: none !important;
+}
+
+/* Badge / chip rounded upgrade */
+.badge,
+.token-chip,
+.flow-chip,
+.connection-status {
+  border-radius: var(--radius-full) !important;
+  box-shadow: var(--shadow-clay-btn);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clay-blob,
+  .clay-blob--teal,
+  .clay-blob--violet,
+  .clay-blob--amber {
+    animation: none;
+  }
+  .card, .btn-primary, .btn-call-next {
+    transition: none;
   }
 }

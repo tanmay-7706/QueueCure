@@ -50,6 +50,10 @@ export default function PatientDisplayView() {
 
   return (
     <div className="display">
+      {/* Clay accent blob */}
+      <div className="clay-canvas" aria-hidden="true" style={{zIndex: 0}}>
+        <div className="clay-blob clay-blob--teal" style={{opacity: 0.15, filter: 'blur(90px)'}} />
+      </div>
       {/* Ambient background glows */}
       <div className="display__ambient-glow display__ambient-glow--1" />
       <div className="display__ambient-glow display__ambient-glow--2" />

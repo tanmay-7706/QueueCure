@@ -120,10 +120,17 @@ export default function ReceptionistView() {
 
   return (
     <div className="receptionist">
+      {/* Clay background blobs */}
+      <div className="clay-canvas" aria-hidden="true">
+        <div className="clay-blob clay-blob--teal" />
+        <div className="clay-blob clay-blob--violet" />
+        <div className="clay-blob clay-blob--amber" />
+      </div>
+
       {/* ── Header ── */}
       <header className="receptionist__header">
         <div className="receptionist__header-left">
-          <h1 className="receptionist__title">
+          <h1 className="receptionist__title" style={{ fontFamily: 'var(--font-heading)' }}>
             <span className="receptionist__logo">🏥</span>
             Queue Cure
           </h1>
@@ -270,7 +277,7 @@ export default function ReceptionistView() {
         <div className="receptionist__queue-col">
           {/* Queue Flow Lane */}
           <div className="card card--flow">
-            <h2 className="card__heading" style={{ marginBottom: '0.5rem' }}>Queue Flow</h2>
+            <h2 className="card__heading" style={{ marginBottom: '0.5rem', fontFamily: 'var(--font-heading)' }}>Queue Flow</h2>
             <div className="flow-lane">
               {flowTokens.length > 0 ? flowTokens.map(token => (
                 <div 
@@ -286,7 +293,7 @@ export default function ReceptionistView() {
           </div>
 
           <div className="card card--queue">
-            <h2 className="card__heading">
+            <h2 className="card__heading" style={{ fontFamily: 'var(--font-heading)' }}>
               Waiting List
               <span className="card__badge">{waitingCount}</span>
             </h2>
