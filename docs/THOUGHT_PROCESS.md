@@ -69,6 +69,10 @@ The "Undo Last Call" button stores the state from immediately before the most re
 
 A real clinic scenario no queue system should ignore — doctors step out for lunch, take calls, or run between wards. When marked on break, the server blocks all `callNext` requests (guards against accidental calls from a stale second tab), the patient display switches from showing a counting wait time (which would be meaningless during a break) to a calm "Doctor on a short break" message, and the receptionist console visually shifts the queue into a paused state. When the break ends, everything resumes exactly where it left off with no state loss.
 
+### Session Reset
+
+**Session Reset**: Clinic management systems serve one fundamental daily lifecycle — open at 9am, serve patients all day, close at 6pm, repeat. A queue system that can't cleanly reset for the next day forces the operator to restart the server, which is an unacceptable operational burden. The Reset Session function clears all patients, the token counter, the rolling average history, and the idempotency cache in a single atomic server operation, broadcasts the empty state to all connected screens immediately, and requires confirmation via a browser dialog to prevent accidental resets. Token numbers restart from 1, exactly as a paper slip dispenser would at the start of a new day.
+
 ---
 
 ## 4. What I'd Do with More Time

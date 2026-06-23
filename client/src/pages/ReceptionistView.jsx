@@ -29,6 +29,7 @@ export default function ReceptionistView() {
     undoLastCall,
     setAvgConsultTime,
     setDoctorStatus,
+    resetSession,
     clearLastAction,
   } = useQueueSocket();
 
@@ -103,6 +104,27 @@ export default function ReceptionistView() {
   const currentToken = queueState?.currentToken;
   const canUndo = queueState?.canUndo ?? false;
   const isOnBreak = queueState?.isOnBreak ?? false;
+
+  // Consultation timer — counts up from when the last patient was called
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!queueState?.currentToken || !queueState?.lastCallTimestamp) {
+      setElapsedSeconds(0);
+      return;
+    }
+    const start = new Date(queueState.lastCallTimestamp).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
+    tick(); // immediate first tick
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [queueState?.currentToken?.id, queueState?.lastCallTimestamp]);
+
+  const formatElapsed = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${String(s).padStart(2, '0')}s`;
+  };
   
   const [servedCount, setServedCount] = useState(0);
   
@@ -204,6 +226,9 @@ export default function ReceptionistView() {
               <div className="serving-display">
                 <span className="serving-display__token">#{currentToken.tokenNumber}</span>
                 <span className="serving-display__name">{currentToken.name}</span>
+                <span className="consultation-timer">
+                  ⏱ {formatElapsed(elapsedSeconds)}
+                </span>
               </div>
             ) : (
               <div className="serving-display serving-display--empty">
@@ -346,6 +371,17 @@ export default function ReceptionistView() {
                 if (n < 5) return <span style={{ color: 'var(--color-amber)' }}>📊 Based on {n} real consultations</span>;
                 return <span style={{ color: 'var(--color-success)' }}>✅ Full data — rolling avg of last 5 consultations</span>;
               })()}
+            </div>
+            
+            <div className="settings__reset-section">
+              <p className="settings__reset-label">End of day</p>
+              <button
+                className="btn--reset"
+                onClick={() => resetSession()}
+                title="Clear all patients and history for a fresh start"
+              >
+                🔄 Reset Session
+              </button>
             </div>
           </div>
         </div>

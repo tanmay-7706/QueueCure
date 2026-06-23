@@ -84,6 +84,13 @@ function registerHandlers(io, socket) {
     const snapshot = queueStore.setDoctorStatus(doctorId, isOnBreak);
     io.emit('queue:update', snapshot);
   });
+
+  // ── receptionist:resetSession ──
+  socket.on('receptionist:resetSession', (data) => {
+    const { doctorId = 'default' } = data || {};
+    const snapshot = queueStore.resetSession(doctorId);
+    io.emit('queue:update', snapshot);
+  });
 }
 
 module.exports = { registerHandlers };

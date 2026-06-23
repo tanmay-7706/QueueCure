@@ -85,6 +85,7 @@ function getSnapshot(doctorId = 'default') {
     canUndo: doc.undoSnapshot !== null,
     realDataPoints: doc.consultDurations.length,
     isOnBreak: doc.isOnBreak,
+    lastCallTimestamp: doc.lastCallTimestamp,
   };
 }
 
@@ -199,6 +200,20 @@ function setDoctorStatus(doctorId = 'default', isOnBreak) {
   return getSnapshot(doctorId);
 }
 
+function resetSession(doctorId = 'default') {
+  const doc = ensureDoctor(doctorId);
+  doc.currentToken = null;
+  doc.waitingTokens = [];
+  doc.consultDurations = [];
+  doc.lastCallTimestamp = null;
+  doc.nextTokenNumber = 1;
+  doc.undoSnapshot = null;
+  doc.isOnBreak = false;
+  // Clear idempotency cache too
+  state.recentRequestIds = [];
+  return getSnapshot(doctorId);
+}
+
 /* ------------------------------------------------------------------ */
 /*  EXPORTS                                                            */
 /* ------------------------------------------------------------------ */
@@ -209,5 +224,6 @@ module.exports = {
   undoLastCall,
   setAvgConsultTime,
   setDoctorStatus,
+  resetSession,
   getSnapshot,
 };

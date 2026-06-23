@@ -13,45 +13,45 @@
 
 /* ── CSS Variables ── */
 :root {
-  /* ── Clay Canvas ── */
-  --color-bg: #F4F1FA;
-  --color-surface: rgba(255, 255, 255, 0.75);
-  --color-surface-hover: rgba(255, 255, 255, 0.9);
-  --color-border: rgba(255, 255, 255, 0.6);
-  --color-border-light: rgba(255, 255, 255, 0.4);
+  /* ── Dark Clinical Canvas ── */
+  --color-bg: #0B1120;
+  --color-surface: #111827;
+  --color-surface-hover: #1a2540;
+  --color-border: rgba(148, 163, 184, 0.1);
+  --color-border-light: rgba(148, 163, 184, 0.06);
 
   /* ── Text ── */
-  --color-text: #332F3A;
-  --color-text-secondary: #635F69;
-  --color-text-muted: #8B879A;
+  --color-text: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #4B5563;
 
-  /* ── Primary (Teal — keep healthcare identity) ── */
-  --color-primary: #0D9488;
-  --color-primary-light: #14B8A6;
-  --color-primary-dark: #0F766E;
-  --color-primary-bg: rgba(13, 148, 136, 0.08);
-  --color-primary-glow: rgba(13, 148, 136, 0.25);
+  /* ── Primary (Teal) ── */
+  --color-primary: #14B8A6;
+  --color-primary-light: #2DD4BF;
+  --color-primary-dark: #0D9488;
+  --color-primary-bg: rgba(20, 184, 166, 0.1);
+  --color-primary-glow: rgba(20, 184, 166, 0.3);
 
-  /* ── Accent (Violet — for depth and visual interest) ── */
-  --color-accent: #7C3AED;
-  --color-accent-light: #A78BFA;
+  /* ── Accent ── */
+  --color-accent: #818CF8;
+  --color-accent-light: #A5B4FC;
 
   /* ── Semantic ── */
   --color-amber: #F59E0B;
   --color-amber-light: #FCD34D;
-  --color-amber-bg: rgba(245, 158, 11, 0.1);
+  --color-amber-bg: rgba(245, 158, 11, 0.12);
   --color-amber-dark: #D97706;
-  --color-error: #DC2626;
-  --color-error-light: #EF4444;
-  --color-error-bg: rgba(220, 38, 38, 0.08);
+  --color-error: #EF4444;
+  --color-error-light: #FCA5A5;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
   --color-success: #10B981;
-  --color-success-bg: rgba(16, 185, 129, 0.08);
+  --color-success-bg: rgba(16, 185, 129, 0.1);
 
   /* ── Typography ── */
   --font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-heading: 'Nunito', 'DM Sans', system-ui, sans-serif;
 
-  /* ── Spacing ── */
+  /* ── Spacing (unchanged) ── */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -59,7 +59,7 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
 
-  /* ── Clay Border Radii (aggressive rounding is essential) ── */
+  /* ── Border Radii (unchanged) ── */
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 28px;
@@ -67,43 +67,46 @@
   --radius-2xl: 48px;
   --radius-full: 9999px;
 
-  /* ── Clay Shadow Stack ──
-     Each shadow has 4 layers: ambient drop, top-left highlight, inner bounce, inner rim */
+  /* ── Dark Clinical Shadow Stack ──
+     On dark backgrounds, shadows work differently:
+     The "highlight" is a subtle bright top-edge, not a white drop shadow above.
+     The "depth" is a deeper black below. */
 
-  /* Small interactive elements (buttons, badges) */
+  /* Small interactive elements */
   --shadow-clay-btn:
-    8px 8px 16px rgba(124, 58, 237, 0.18),
-    -5px -5px 12px rgba(255, 255, 255, 0.8),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
-    inset -3px -3px 6px rgba(0, 0, 0, 0.08);
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.25) inset,
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4);
 
-  /* Standard cards */
+  /* Standard cards — frosted monitor panel look */
   --shadow-clay-card:
-    12px 12px 28px rgba(160, 150, 180, 0.18),
-    -8px -8px 20px rgba(255, 255, 255, 0.92),
-    inset 4px 4px 10px rgba(124, 58, 237, 0.03),
-    inset -4px -4px 10px rgba(255, 255, 255, 1);
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.5);
 
-  /* Hover state for cards (deeper lift) */
+  /* Hover state — slight lift + teal rim glow */
   --shadow-clay-card-hover:
-    18px 18px 36px rgba(160, 150, 180, 0.25),
-    -10px -10px 24px rgba(255, 255, 255, 1),
-    inset 4px 4px 10px rgba(124, 58, 237, 0.04),
-    inset -4px -4px 10px rgba(255, 255, 255, 1);
+    0 1px 0 rgba(255, 255, 255, 0.09) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(20, 184, 166, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.5);
 
-  /* Recessed / pressed (inputs, active button state) */
+  /* Recessed inputs */
   --shadow-clay-pressed:
-    inset 8px 8px 16px #d9d4e3,
-    inset -8px -8px 16px #ffffff;
+    inset 0 2px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
 
-  /* Primary teal button */
+  /* Primary teal button — glow effect */
   --shadow-clay-primary:
-    8px 8px 20px rgba(13, 148, 136, 0.28),
-    -5px -5px 12px rgba(255, 255, 255, 0.5),
-    inset 3px 3px 8px rgba(255, 255, 255, 0.3),
-    inset -3px -3px 8px rgba(0, 0, 0, 0.1);
+    0 0 20px rgba(20, 184, 166, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
 
-  /* Legacy aliases — keeps existing component CSS working */
+  /* Legacy aliases */
   --shadow-sm: var(--shadow-clay-btn);
   --shadow-md: var(--shadow-clay-card);
   --shadow-lg: var(--shadow-clay-card-hover);
@@ -250,7 +253,7 @@ h1, h2, h3, h4, h5, h6,
   padding: 1rem 1.5rem;
   font-size: 1.1rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
   color: #fff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md), 0 0 0 0 var(--color-primary-glow);
@@ -1196,6 +1199,26 @@ h1, h2, h3, h4, h5, h6,
     font-size: 1rem;
   }
 }
+/* ────────────────────────────────────────────
+   CONSULTATION TIMER
+──────────────────────────────────────────── */
+
+.consultation-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-bg);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  margin-left: var(--space-sm);
+  letter-spacing: 0.05em;
+  animation: clay-breathe 2s ease-in-out infinite;
+}
 
 /* ────────────────────────────────────────────
    KEYBOARD SHORTCUT HINTS
@@ -1338,7 +1361,7 @@ kbd {
 .clay-blob--teal {
   width: 55vw;
   height: 55vw;
-  background: radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.12) 0%, transparent 70%);
   top: -15%;
   left: -10%;
   animation: clay-blob-drift 14s ease-in-out infinite;
@@ -1347,7 +1370,7 @@ kbd {
 .clay-blob--violet {
   width: 45vw;
   height: 45vw;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.08) 0%, transparent 70%);
   top: 20%;
   right: -12%;
   animation: clay-blob-drift-alt 18s ease-in-out infinite;
@@ -1357,7 +1380,7 @@ kbd {
 .clay-blob--amber {
   width: 35vw;
   height: 35vw;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
   bottom: -10%;
   left: 30%;
   animation: clay-blob-drift-slow 22s ease-in-out infinite;
@@ -1367,12 +1390,12 @@ kbd {
 /* Clay card base — apply to all .card elements */
 .card {
   background: var(--color-surface) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-xl) !important;
   box-shadow: var(--shadow-clay-card) !important;
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .card:hover {
@@ -1392,10 +1415,9 @@ kbd {
 .btn-call-next:hover {
   transform: translateY(-3px);
   box-shadow:
-    10px 10px 24px rgba(13, 148, 136, 0.32),
-    -6px -6px 14px rgba(255, 255, 255, 0.6),
-    inset 3px 3px 8px rgba(255, 255, 255, 0.35),
-    inset -3px -3px 8px rgba(0, 0, 0, 0.1) !important;
+    0 0 28px rgba(20, 184, 166, 0.45),
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset !important;
 }
 
 .btn-primary:active,
@@ -1408,8 +1430,9 @@ kbd {
 input[type="text"],
 input[type="number"],
 .input-clay {
-  background: #EFEBF5 !important;
-  border: none !important;
+  background: #0B1120 !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
   border-radius: var(--radius-md) !important;
   box-shadow: var(--shadow-clay-pressed) !important;
   transition: box-shadow var(--transition-normal), background var(--transition-normal);
@@ -1418,11 +1441,17 @@ input[type="number"],
 input[type="text"]:focus,
 input[type="number"]:focus,
 .input-clay:focus {
-  background: #ffffff !important;
+  background: #111827 !important;
+  border-color: var(--color-primary) !important;
   box-shadow:
     var(--shadow-clay-card),
-    0 0 0 3px rgba(13, 148, 136, 0.2) !important;
+    0 0 0 3px rgba(20, 184, 166, 0.2) !important;
   outline: none !important;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--color-text-muted) !important;
 }
 
 /* Badge / chip rounded upgrade */
@@ -1432,6 +1461,47 @@ input[type="number"]:focus,
 .connection-status {
   border-radius: var(--radius-full) !important;
   box-shadow: var(--shadow-clay-btn);
+}
+
+/* ────────────────────────────────────────────
+   SESSION RESET
+──────────────────────────────────────────── */
+
+.settings__reset-section {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.settings__reset-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.btn--reset {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-error-light);
+  background: var(--color-error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-full);
+  padding: var(--space-xs) var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn--reset:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {

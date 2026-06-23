@@ -15,6 +15,7 @@ All socket event names, payloads, and flows used by Queue Cure '26.
 | `receptionist:undoLastCall` | `{ doctorId: string }` | Revert the last "Call Next" action |
 | `receptionist:setAvgConsultTime` | `{ doctorId: string, minutes: number }` | Update the manual average consultation time (cold-start fallback) |
 | `receptionist:setDoctorStatus` | `{ doctorId: string, isOnBreak: boolean }` | Pause or resume the queue for a doctor break |
+| `receptionist:resetSession` | `{ doctorId: string }` | Clear all patients, history, and rolling average. Broadcasts fresh empty state to all clients. |
 | `client:requestSync` | `{}` | Sent automatically on connect/reconnect to get current full state |
 
 ### Server → All Clients (broadcast)
