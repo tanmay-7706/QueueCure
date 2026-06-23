@@ -1198,6 +1198,102 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ────────────────────────────────────────────
+   KEYBOARD SHORTCUT HINTS
+──────────────────────────────────────────── */
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  box-shadow: var(--shadow-clay-pressed);
+  margin-left: var(--space-sm);
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+/* ────────────────────────────────────────────
+   DOCTOR BREAK TOGGLE
+──────────────────────────────────────────── */
+
+.btn--break-toggle {
+  width: 100%;
+  background: transparent;
+  border: 2px dashed var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.btn--break-toggle:hover {
+  border-color: var(--color-amber);
+  color: var(--color-amber-dark);
+  background: var(--color-amber-bg);
+}
+
+.btn--break-toggle--active {
+  border-style: solid;
+  border-color: var(--color-success);
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  animation: clay-breathe 3s ease-in-out infinite;
+}
+
+.btn--paused {
+  background: var(--color-amber-bg) !important;
+  color: var(--color-amber-dark) !important;
+  box-shadow: var(--shadow-clay-pressed) !important;
+  cursor: not-allowed;
+}
+
+/* Patient Display Break Overlay */
+.display__break-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-2xl);
+  animation: clay-breathe 4s ease-in-out infinite;
+}
+
+.display__break-icon {
+  font-size: 4rem;
+  animation: clay-blob-drift 6s ease-in-out infinite;
+}
+
+.display__break-message {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.display__break-subtext {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  max-width: 400px;
+}
+
+/* ────────────────────────────────────────────
    CLAY ANIMATIONS
 ──────────────────────────────────────────── */
 

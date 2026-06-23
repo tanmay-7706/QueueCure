@@ -44,6 +44,7 @@ function ensureDoctor(doctorId) {
       avgConsultMinutes: 10,
       nextTokenNumber: 1,
       undoSnapshot: null,
+      isOnBreak: false,
     };
   }
   return state.doctors[doctorId];
@@ -82,6 +83,8 @@ function getSnapshot(doctorId = 'default') {
     estimatedWaitMinutes: Math.round(estimatedWait * 10) / 10,
     lastUpdated: new Date().toISOString(),
     canUndo: doc.undoSnapshot !== null,
+    realDataPoints: doc.consultDurations.length,
+    isOnBreak: doc.isOnBreak,
   };
 }
 
@@ -110,6 +113,11 @@ function callNext(doctorId = 'default', requestId) {
   }
 
   const doc = ensureDoctor(doctorId);
+
+  // ── Doctor on break guard ──
+  if (doc.isOnBreak) {
+    return { snapshot: getSnapshot(doctorId), onBreak: true };
+  }
 
   // ── Empty-queue edge case ──
   if (doc.waitingTokens.length === 0) {
@@ -185,6 +193,12 @@ function setAvgConsultTime(doctorId = 'default', minutes) {
   return getSnapshot(doctorId);
 }
 
+function setDoctorStatus(doctorId = 'default', isOnBreak) {
+  const doc = ensureDoctor(doctorId);
+  doc.isOnBreak = Boolean(isOnBreak);
+  return getSnapshot(doctorId);
+}
+
 /* ------------------------------------------------------------------ */
 /*  EXPORTS                                                            */
 /* ------------------------------------------------------------------ */
@@ -194,5 +208,6 @@ module.exports = {
   callNext,
   undoLastCall,
   setAvgConsultTime,
+  setDoctorStatus,
   getSnapshot,
 };

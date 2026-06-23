@@ -65,6 +65,10 @@ On the common path, the receptionist's own screen already shows zero patients wa
 
 The "Undo Last Call" button stores the state from immediately before the most recent "Call Next" action (the previous `currentToken`, the called token, and the timestamp). Clicking undo restores the called patient to the front of the queue and reverts `currentToken` to whatever it was before. Only one level of undo is supported — this covers the receptionist's most common mistake ("I clicked too fast") without adding undo/redo complexity.
 
+### Doctor On Break toggle
+
+A real clinic scenario no queue system should ignore — doctors step out for lunch, take calls, or run between wards. When marked on break, the server blocks all `callNext` requests (guards against accidental calls from a stale second tab), the patient display switches from showing a counting wait time (which would be meaningless during a break) to a calm "Doctor on a short break" message, and the receptionist console visually shifts the queue into a paused state. When the break ends, everything resumes exactly where it left off with no state loss.
+
 ---
 
 ## 4. What I'd Do with More Time

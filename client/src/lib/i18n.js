@@ -35,6 +35,12 @@ const strings = {
     connected: 'Connected',
     disconnected: 'Disconnected',
     reconnecting: 'Reconnecting…',
+    doctorOnBreak: 'On Break',
+    doctorAvailable: 'Available',
+    breakToggleStart: 'Start Break',
+    breakToggleEnd: 'End Break',
+    breakMessage: 'Doctor on a short break',
+    breakSubtext: 'We will resume shortly — thank you for your patience',
   },
   hi: {
     // Patient Display
@@ -65,6 +71,12 @@ const strings = {
     connected: 'कनेक्टेड',
     disconnected: 'डिस्कनेक्टेड',
     reconnecting: 'पुनः कनेक्ट हो रहा है…',
+    doctorOnBreak: 'ब्रेक पर',
+    doctorAvailable: 'उपलब्ध',
+    breakToggleStart: 'ब्रेक शुरू करें',
+    breakToggleEnd: 'ब्रेक खत्म करें',
+    breakMessage: 'डॉक्टर छोटे ब्रेक पर हैं',
+    breakSubtext: 'हम जल्द ही फिर शुरू करेंगे — धन्यवाद',
   },
 };
 

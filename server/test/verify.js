@@ -216,6 +216,45 @@ async function runTests() {
   } catch (err) {
     console.error('❌ FAIL: Empty queue test', err);
   }
+  // 6. Doctor break test
+  try {
+    const docId = getDocId('break');
+    const client = createClient();
+    await new Promise(r => client.once('connect', r));
+
+    // Add patient
+    client.emit('receptionist:addPatient', { name: 'BreakTest', doctorId: docId });
+    await waitForUpdate(client, d => d.doctorId === docId && d.waitingTokens.length === 1);
+
+    // Set doctor on break
+    client.emit('receptionist:setDoctorStatus', { doctorId: docId, isOnBreak: true });
+    const breakState = await waitForUpdate(client, d => d.doctorId === docId && d.isOnBreak === true);
+    assert.strictEqual(breakState.isOnBreak, true, 'Doctor marked on break');
+    assert.strictEqual(breakState.waitingTokens.length, 1, 'Patient still in queue during break');
+
+    // Try to call next while on break — should be blocked
+    client.emit('receptionist:callNext', { doctorId: docId, requestId: 'break-req-1' });
+    await sleep(300);
+    client.emit('receptionist:setAvgConsultTime', { doctorId: docId, minutes: 10 }); // trigger a state echo
+    const duringBreak = await waitForUpdate(client, d => d.doctorId === docId);
+    assert.strictEqual(duringBreak.currentToken, null, 'callNext blocked during break — no patient advanced');
+
+    // End break
+    client.emit('receptionist:setDoctorStatus', { doctorId: docId, isOnBreak: false });
+    const resumedState = await waitForUpdate(client, d => d.doctorId === docId && d.isOnBreak === false);
+    assert.strictEqual(resumedState.isOnBreak, false, 'Doctor back from break');
+    assert.strictEqual(resumedState.waitingTokens.length, 1, 'Patient still waiting after break ends');
+
+    // Now callNext should work
+    client.emit('receptionist:callNext', { doctorId: docId, requestId: 'break-req-2' });
+    const afterBreak = await waitForUpdate(client, d => d.doctorId === docId && d.currentToken?.name === 'BreakTest');
+    assert.strictEqual(afterBreak.currentToken.name, 'BreakTest', 'Queue resumes correctly after break');
+
+    console.log('✅ PASS: Doctor break test');
+    client.disconnect();
+  } catch (err) {
+    console.error('❌ FAIL: Doctor break test', err);
+  }
 
   process.exit(0);
 }

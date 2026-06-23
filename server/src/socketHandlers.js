@@ -40,6 +40,11 @@ function registerHandlers(io, socket) {
       return;
     }
 
+    if (result.onBreak) {
+      socket.emit('queue:update', result.snapshot);
+      return;
+    }
+
     if (result.emptyQueue) {
       // Still broadcast state for consistency back to the requesting client
       socket.emit('queue:update', result.snapshot);
@@ -69,6 +74,14 @@ function registerHandlers(io, socket) {
     const { doctorId = 'default', minutes } = data || {};
     if (!minutes || typeof minutes !== 'number' || minutes < 1) return;
     const snapshot = queueStore.setAvgConsultTime(doctorId, minutes);
+    io.emit('queue:update', snapshot);
+  });
+
+  // ── receptionist:setDoctorStatus ──
+  socket.on('receptionist:setDoctorStatus', (data) => {
+    const { doctorId = 'default', isOnBreak } = data || {};
+    if (typeof isOnBreak !== 'boolean') return;
+    const snapshot = queueStore.setDoctorStatus(doctorId, isOnBreak);
     io.emit('queue:update', snapshot);
   });
 }

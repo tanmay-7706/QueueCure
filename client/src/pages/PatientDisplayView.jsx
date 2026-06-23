@@ -47,6 +47,7 @@ export default function PatientDisplayView() {
   const waitingTokens = queueState?.waitingTokens ?? [];
   const next3 = waitingTokens.slice(0, 3);
   const estimatedWait = queueState?.estimatedWaitMinutes ?? 0;
+  const isOnBreak = queueState?.isOnBreak ?? false;
 
   return (
     <div className="display">
@@ -85,7 +86,13 @@ export default function PatientDisplayView() {
         {/* ── Now Serving ── */}
         <section className="display__serving-section">
           <h2 className="display__label">{t(lang, 'nowServing')}</h2>
-          {currentToken ? (
+          {isOnBreak ? (
+            <div className="display__break-overlay">
+              <span className="display__break-icon">⏸️</span>
+              <p className="display__break-message">{t(lang, 'breakMessage')}</p>
+              <p className="display__break-subtext">{t(lang, 'breakSubtext')}</p>
+            </div>
+          ) : currentToken ? (
             <div className={`display__current-token ${isPulsing ? 'display__current-token--pulse' : ''}`}>
               <span className="display__token-number">#{currentToken.tokenNumber}</span>
               <span className="display__token-name">{currentToken.name}</span>
@@ -117,6 +124,7 @@ export default function PatientDisplayView() {
           </section>
 
           {/* Wait Info */}
+          {isOnBreak ? null : (
           <section className="display__wait-section">
             <h2 className="display__label">{t(lang, 'estimatedWait')}</h2>
             <div className="display__wait-value">
@@ -129,6 +137,7 @@ export default function PatientDisplayView() {
               {waitingTokens.length} {t(lang, 'patientsWaiting')}
             </p>
           </section>
+          )}
         </div>
       </main>
 

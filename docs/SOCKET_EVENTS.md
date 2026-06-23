@@ -14,6 +14,7 @@ All socket event names, payloads, and flows used by Queue Cure '26.
 | `receptionist:callNext` | `{ doctorId: string, requestId: string }` | Call the next patient. `requestId` is a client-generated UUID for idempotency |
 | `receptionist:undoLastCall` | `{ doctorId: string }` | Revert the last "Call Next" action |
 | `receptionist:setAvgConsultTime` | `{ doctorId: string, minutes: number }` | Update the manual average consultation time (cold-start fallback) |
+| `receptionist:setDoctorStatus` | `{ doctorId: string, isOnBreak: boolean }` | Pause or resume the queue for a doctor break |
 | `client:requestSync` | `{}` | Sent automatically on connect/reconnect to get current full state |
 
 ### Server → All Clients (broadcast)
@@ -32,7 +33,9 @@ All socket event names, payloads, and flows used by Queue Cure '26.
   "avgConsultMinutes": 8,
   "estimatedWaitMinutes": 24,
   "lastUpdated": "2026-06-17T00:00:00.000Z",
-  "canUndo": true
+  "canUndo": true,
+  "realDataPoints": 3,
+  "isOnBreak": false
 }
 ```
 
@@ -111,4 +114,32 @@ sequenceDiagram
     R->>S: receptionist:callNext { doctorId, requestId: "abc-123" }
     S->>S: requestId "abc-123" found in cache → NO-OP
     S-->>R: queue:update (current state, to this socket only)
+```
+
+### Doctor Break Flow
+
+```mermaid
+sequenceDiagram
+    participant R as Receptionist Client
+    participant S as Server
+    participant P as Patient Display
+
+    R->>S: receptionist:setDoctorStatus { isOnBreak: true }
+    S->>S: Set doc.isOnBreak = true
+    S-->>R: queue:update (broadcast, isOnBreak: true)
+    S-->>P: queue:update (broadcast, isOnBreak: true)
+    R->>R: Show "Queue Paused" button, disable Call Next
+    P->>P: Show break screen, hide estimated wait
+
+    Note over R: Receptionist tries Call Next during break
+    R->>S: receptionist:callNext { doctorId, requestId }
+    S->>S: isOnBreak guard → blocked
+    S-->>R: queue:update (current state, to this socket only)
+
+    R->>S: receptionist:setDoctorStatus { isOnBreak: false }
+    S->>S: Set doc.isOnBreak = false
+    S-->>R: queue:update (broadcast, isOnBreak: false)
+    S-->>P: queue:update (broadcast, isOnBreak: false)
+    R->>R: Resume normal Call Next button
+    P->>P: Resume normal serving display
 ```

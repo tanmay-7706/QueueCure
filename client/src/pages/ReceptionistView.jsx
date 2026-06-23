@@ -28,6 +28,7 @@ export default function ReceptionistView() {
     callNext,
     undoLastCall,
     setAvgConsultTime,
+    setDoctorStatus,
     clearLastAction,
   } = useQueueSocket();
 
@@ -101,6 +102,7 @@ export default function ReceptionistView() {
   const waitingCount = queueState?.waitingTokens?.length ?? 0;
   const currentToken = queueState?.currentToken;
   const canUndo = queueState?.canUndo ?? false;
+  const isOnBreak = queueState?.isOnBreak ?? false;
   
   const [servedCount, setServedCount] = useState(0);
   
@@ -117,6 +119,57 @@ export default function ReceptionistView() {
     }
     prevWaitingCountRef.current = waitingCount;
   }, [waitingCount]);
+
+  // ── Keyboard Shortcuts ──
+  useEffect(() => {
+    function handleKeyDown(e) {
+      const tag = e.target.tagName;
+      const isInput = tag === 'INPUT' || tag === 'TEXTAREA';
+
+      // Escape always blurs
+      if (e.key === 'Escape') {
+        document.activeElement?.blur();
+        return;
+      }
+
+      // If inside an input, ignore all other shortcuts
+      if (isInput) return;
+
+      // If target is a button, ignore Space (let native click work)
+      if (tag === 'BUTTON' && e.key === ' ') return;
+
+      // Space → Call Next
+      if (e.key === ' ' && !isCallingNext) {
+        e.preventDefault();
+        handleCallNext();
+        return;
+      }
+
+      // Ctrl+Z / Cmd+Z → Undo
+      if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+        if (queueState?.canUndo) {
+          handleUndo();
+        }
+        return;
+      }
+
+      // / → Focus patient name input
+      if (e.key === '/') {
+        e.preventDefault();
+        nameInputRef.current?.focus();
+        return;
+      }
+
+      // B → Toggle doctor break
+      if (e.key === 'b' || e.key === 'B') {
+        setDoctorStatus(!isOnBreak);
+        return;
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCallingNext, queueState?.canUndo, isOnBreak]);
 
   return (
     <div className="receptionist">
@@ -183,19 +236,25 @@ export default function ReceptionistView() {
           <div className="card card--call-actions">
             <button
               id="btn-call-next"
-              className={`btn btn--call-next ${isCallingNext ? 'btn--loading' : ''}`}
+              className={`btn btn--call-next ${isCallingNext ? 'btn--loading' : ''} ${isOnBreak ? 'btn--paused' : ''}`}
               onClick={handleCallNext}
-              disabled={isCallingNext || !isConnected}
+              disabled={isCallingNext || !isConnected || isOnBreak}
             >
               {isCallingNext ? (
                 <>
                   <span className="btn__spinner" />
                   Calling…
                 </>
+              ) : isOnBreak ? (
+                <>
+                  <span className="btn__icon">⏸️</span>
+                  Queue Paused
+                </>
               ) : (
                 <>
                   <span className="btn__icon">📢</span>
                   Call Next
+                  <kbd>Space</kbd>
                 </>
               )}
             </button>
@@ -205,7 +264,16 @@ export default function ReceptionistView() {
               onClick={handleUndo}
               disabled={!canUndo || !isConnected}
             >
-              ↩ Undo Last Call
+              ↩ Undo Last Call <kbd>⌘Z</kbd>
+            </button>
+            <button
+              className={`btn btn--break-toggle ${isOnBreak ? 'btn--break-toggle--active' : ''}`}
+              onClick={() => setDoctorStatus(!isOnBreak)}
+              title={isOnBreak ? 'Click to end break and resume queue' : 'Click to pause queue for a short break'}
+            >
+              <span className="btn__icon">{isOnBreak ? '▶️' : '⏸️'}</span>
+              {isOnBreak ? 'End Break' : 'Start Break'}
+              <kbd>B</kbd>
             </button>
           </div>
 
@@ -269,6 +337,15 @@ export default function ReceptionistView() {
               {queueState?.estimatedWaitMinutes !== undefined && (
                 <> · Est. total wait: <strong>{queueState.estimatedWaitMinutes} min</strong></>
               )}
+            </div>
+            <div className="settings-form__info" style={{ marginTop: '0.35rem', fontSize: '0.78rem' }}>
+              {(() => {
+                const n = queueState?.realDataPoints ?? 0;
+                if (n === 0) return <span style={{ color: 'var(--color-text-muted)' }}>📋 Using manual fallback (no real data yet)</span>;
+                if (n === 1) return <span style={{ color: 'var(--color-amber)' }}>📊 Based on 1 real consultation</span>;
+                if (n < 5) return <span style={{ color: 'var(--color-amber)' }}>📊 Based on {n} real consultations</span>;
+                return <span style={{ color: 'var(--color-success)' }}>✅ Full data — rolling avg of last 5 consultations</span>;
+              })()}
             </div>
           </div>
         </div>

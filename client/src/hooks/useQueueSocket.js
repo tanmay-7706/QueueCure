@@ -106,6 +106,15 @@ export function useQueueSocket() {
     setLastAction(null);
   }, []);
 
+  const setDoctorStatus = useCallback((isOnBreak, doctorId = 'default') => {
+    socket.emit('receptionist:setDoctorStatus', { doctorId, isOnBreak });
+    setLastAction({
+      type: isOnBreak ? 'warning' : 'success',
+      message: isOnBreak ? 'Doctor marked on break' : 'Doctor back — queue resumed',
+      timestamp: Date.now(),
+    });
+  }, []);
+
   return {
     queueState,
     isCallingNext,
@@ -115,6 +124,7 @@ export function useQueueSocket() {
     callNext,
     undoLastCall,
     setAvgConsultTime,
+    setDoctorStatus,
     clearLastAction,
   };
 }
