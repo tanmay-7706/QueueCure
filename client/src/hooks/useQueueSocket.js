@@ -116,7 +116,6 @@ export function useQueueSocket() {
   }, []);
 
   const resetSession = useCallback((doctorId = 'default') => {
-    if (!window.confirm('Reset the entire session? This will clear all patients and history. This cannot be undone.')) return;
     socket.emit('receptionist:resetSession', { doctorId });
     setLastAction({ type: 'warning', message: 'Session reset — ready for a new day', timestamp: Date.now() });
   }, []);

@@ -36,6 +36,7 @@ export default function ReceptionistView() {
   const [patientName, setPatientName] = useState('');
   const [consultMinutes, setConsultMinutes] = useState('');
   const [flowTokens, setFlowTokens] = useState([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const nameInputRef = useRef(null);
 
   // Sync flowTokens with exit animation
@@ -373,15 +374,33 @@ export default function ReceptionistView() {
               })()}
             </div>
             
-            <div className="settings__reset-section">
+            <div className="settings__reset-section" onClick={() => !showResetConfirm && setShowResetConfirm(true)} style={{ cursor: showResetConfirm ? 'default' : 'pointer' }}>
               <p className="settings__reset-label">End of day</p>
-              <button
-                className="btn--reset"
-                onClick={() => resetSession()}
-                title="Clear all patients and history for a fresh start"
-              >
-                🔄 Reset Session
-              </button>
+              {showResetConfirm ? (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    className="btn--reset"
+                    onClick={(e) => { e.stopPropagation(); resetSession(); setShowResetConfirm(false); }}
+                  >
+                    Yes, Reset
+                  </button>
+                  <button
+                    className="btn--primary"
+                    style={{ background: 'var(--color-surface-raised)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
+                    onClick={(e) => { e.stopPropagation(); setShowResetConfirm(false); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="btn--reset"
+                  onClick={(e) => { e.stopPropagation(); setShowResetConfirm(true); }}
+                  title="Clear all patients and history for a fresh start"
+                >
+                  🔄 Reset Session
+                </button>
+              )}
             </div>
           </div>
         </div>
