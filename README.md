@@ -50,12 +50,16 @@ Open both links side by side and click "Call Next" to see it in action:
 
 ---
 
-## What Makes This Different
+## Features
 
-Most queue management demos get the "happy path" right — they add patients and call next, and the screen updates. Queue Cure was built to be correct in the cases most demos ignore:
+### 🔁 Real-Time Live Sync
+Every action — add patient, call next, undo, break, reset — is instantly reflected on both screens via WebSocket. No polling, no refresh. The patient display updates within milliseconds of any receptionist action.
 
-### ① Real Wait-Time, Not a Guess
-The estimated wait shown to patients is **never hardcoded or manually entered permanently**. The system tracks actual consultation durations (time between consecutive "Call Next" clicks) and maintains a **rolling average of the last 5 real durations** per doctor.
+### ⏱️ Live Consultation Timer
+A real-time stopwatch appears under "Currently Serving" on the receptionist console the moment a patient is called. It counts up every second, giving the receptionist live visibility into how long the current consultation has been running.
+
+### 📊 Adaptive Wait-Time Estimation
+The estimated wait shown to patients is **never hardcoded**. The system tracks actual consultation durations (time between consecutive "Call Next" clicks) and maintains a **rolling average of the last 5 real durations** per doctor.
 
 ```
 Day start (cold start):
@@ -66,38 +70,71 @@ After first real call:
   The manual fallback is never used again while real data exists.
 ```
 
-A window of 5 makes the estimate **responsive** — if the morning is slow but the afternoon picks up, the display adapts within 5 consultations, rather than averaging the entire day's history.
+**Full transparency:** The settings card explicitly shows the algorithm's current state:
+- `📋 Using manual fallback (10 min)` — cold start, no data yet
+- `📊 Based on 1 real consultation` — transitioning to real data
+- `✅ Full data — rolling avg of last 5 consultations` — fully self-calibrated
 
-### ② Idempotent "Call Next" — No Double-Skips
-Every "Call Next" request carries a **client-generated UUID** (`requestId`). The server maintains a bounded cache of the last 50 request IDs. If the same ID arrives twice (flaky network retry, double-click before the button disables), the second request is a **no-op** — it returns the current state without advancing the queue.
+### 🛡️ Idempotent "Call Next" — No Double-Skips
+Every "Call Next" request carries a **client-generated UUID** (`requestId`). The server maintains a bounded cache of the last 50 request IDs. If the same ID arrives twice (flaky network, double-click), the second request is a **no-op**.
 
 Two layers of protection:
 - **Server:** `requestId` deduplication cache (bounded at 50, oldest evicted)
-- **Client:** Button disables immediately on click, re-enables only when `queue:update` is received back (or after a 5-second timeout that surfaces an error state)
+- **Client:** Button disables immediately on click, re-enables only on `queue:update` (or after a 5-second timeout)
 
-### ③ Reconnection Correctness
-Socket.io's built-in reconnection restores the transport — it doesn't guarantee the **application state** is current. On every `connect` event (including reconnects), the client emits `client:requestSync`, and the server replies with the full current state **to that socket only** (not a broadcast). A patient display that lost Wi-Fi for 30 seconds will catch up to the correct queue state the moment it comes back — without the receptionist doing anything.
-
-### ④ Undo with Zero Side Effects
+### ↩️ Undo with Zero Side Effects
 "Undo Last Call" doesn't just push the patient back — it **restores the exact previous state**, including:
 - The token returned to the front of the waiting list (same ID, same position)
-- `currentToken` reverted to what it was before the call
-- The `lastCallTimestamp` reverted, so the next "Call Next" doesn't record a phantom consultation duration
-- The duration entry that the undone call recorded is **removed** from the rolling average data
+- `currentToken` reverted to what it was before
+- The `lastCallTimestamp` reverted, so the timer doesn't record a phantom duration
+- The duration entry is **removed** from the rolling average data
 
-This means the wait-time algorithm sees no trace of the undone action — the average is exactly as if the accidental call never happened.
+The wait-time algorithm sees no trace of the undone action.
 
-### ⑤ Verified with an Automated Socket Test Suite
-All of the above is covered by a programmatic test suite (`server/test/verify.js`) using real `socket.io-client` connections — not mocks, not manual clicking. Each test uses an isolated `doctorId` to avoid cross-contamination.
+### ⌨️ Keyboard Shortcut
+Press **Spacebar** anywhere on the receptionist console (when no input is focused) to trigger "Call Next" instantly — no mouse click needed. Designed for high-throughput clinics.
+
+### ☕ Doctor Break Mode
+Click "Start Break" on the receptionist console, and the patient display immediately shows **"Doctor is on a short break — Please wait"** with a coffee icon. Click "End Break" to resume. Queue state is fully preserved during the break.
+
+### 🌐 Hindi / English Toggle (i18n)
+The patient display supports a **one-click language toggle** between English and Hindi (हिं). All labels — "Now Serving", "Waiting", "Estimated Wait", break messages — are translated using a custom lightweight JSON dictionary. No i18n library overhead.
+
+### 🔄 End-of-Day Session Reset
+A dedicated "End of day" section in the settings card lets the receptionist **completely reset the queue** — clears all patients, resets the token counter to 1, wipes consultation history, and broadcasts the empty state to all connected displays. Uses an inline confirmation UI (not a browser dialog) to prevent accidental resets and ensure compatibility across all environments.
+
+### 🔌 Reconnection Correctness
+Socket.io's reconnection restores the transport — it doesn't guarantee the **application state** is current. On every `connect` event (including reconnects), the client emits `client:requestSync`, and the server replies with the full current state **to that socket only**. A patient display that lost Wi-Fi for 30 seconds catches up instantly without receptionist intervention.
+
+### ✅ Automated Socket Test Suite
+All correctness guarantees are covered by a programmatic test suite (`server/test/verify.js`) using real `socket.io-client` connections — not mocks. Each test uses an isolated `doctorId` to avoid cross-contamination.
 
 ```
 ✅ Idempotency & cache eviction (50-entry bound)
 ✅ Cold-start fallback → rolling average transition
 ✅ 5-entry cap on duration history (push 7, assert last 5 averaged)
-✅ Reconnect sync (disconnect → mutate from another client → reconnect → assert current state)
+✅ Reconnect sync (disconnect → mutate → reconnect → assert current state)
 ✅ Undo correctness (token ID, position, and duration history)
 ✅ Empty-queue edge case (no crash, no silent no-op)
 ```
+
+---
+
+## UI Design — Dark Clinical Theme
+
+The entire application uses a unified **dark clinical theme** inspired by medical monitoring equipment (ECG monitors, vital-sign displays):
+
+- **Background:** Deep charcoal (`#0F1117`) with subtle radial gradients
+- **Cards:** Semi-transparent raised surfaces (`rgba(30,34,46,0.85)`) with soft glow borders
+- **Primary accent:** Clinical teal (`#36D6B5`) for active states and primary actions
+- **Danger accent:** Warm coral (`#E74C6F`) for destructive actions and alerts
+- **Typography:** Nunito + DM Sans from Google Fonts — rounded terminals for a clinical-but-warm feel
+
+### Key Visual Elements
+- **ECG Heartbeat Indicator:** An animated green heartbeat line that pulses while the WebSocket connection is live, and turns red when disconnected
+- **Ambient Gradient Blobs:** Soft teal/purple atmospheric blobs animate behind cards for depth
+- **Smooth Animations:** All queue transitions use CSS animations — tokens slide in, slide out, and cross-fade on state changes
+- **Active-Press Feedback:** Buttons compress (`scale(0.95)`) with inset shadows on click
 
 ---
 
@@ -109,12 +146,12 @@ All of the above is covered by a programmatic test suite (`server/test/verify.js
 | Realtime | Socket.io 4.x | Persistent bidirectional transport with auto-reconnect |
 | Backend | Node.js + Express | Single-threaded event loop = natural single-writer guarantee on shared state |
 | State | In-memory JS object | Deliberate: persistence is out of scope; the rubric tests real-time correctness |
-| Styling | Plain CSS variables | Zero dependency, full control, 4-layer clay shadow system without a framework |
+| Styling | Plain CSS variables | Zero dependency, full control, dark clinical design system |
 | Fonts | Nunito + DM Sans (Google Fonts) | Rounded terminals match the clinical-but-warm aesthetic |
 | i18n | Custom JSON dictionary | English/Hindi toggle on Patient Display — no library overhead |
 | Deployment | Vercel (client) + Render (server) | Vercel for instant static deploys; Render for persistent WebSocket server |
 
-No database. No auth. No third-party APIs. Every dependency serves the four graded criteria directly.
+No database. No auth. No third-party APIs. Every dependency serves the graded criteria directly.
 
 ---
 
@@ -137,7 +174,7 @@ No database. No auth. No third-party APIs. Every dependency serves the four grad
 ┌────────────────────┼──────────────────────────────────────┐
 │                    │    SERVER (Node + Express)             │
 │            socketHandlers.js                              │
-│            (registers 5 event listeners)                  │
+│            (registers event listeners per action)         │
 │                    │                                      │
 │              queueStore.js ◄── Single source of truth     │
 │              Module-level state object                    │
@@ -160,15 +197,17 @@ No database. No auth. No third-party APIs. Every dependency serves the four grad
 | `receptionist:callNext` | `{ doctorId, requestId }` | Advance queue (idempotent via UUID) |
 | `receptionist:undoLastCall` | `{ doctorId }` | Revert last call |
 | `receptionist:setAvgConsultTime` | `{ doctorId, minutes }` | Update cold-start fallback |
+| `receptionist:setDoctorStatus` | `{ doctorId, isOnBreak }` | Toggle doctor break mode |
+| `receptionist:resetSession` | `{ doctorId }` | End-of-day full reset |
 | `client:requestSync` | `{}` | Auto-sent on connect/reconnect for state catch-up |
 
 ### Server → All Clients
 
 | Event | Trigger | Payload includes |
 |---|---|---|
-| `queue:update` | Every mutation + every new connection | `currentToken`, `waitingTokens`, `avgConsultMinutes`, `estimatedWaitMinutes`, `canUndo`, `lastUpdated` |
+| `queue:update` | Every mutation + every new connection | `currentToken`, `waitingTokens`, `avgConsultMinutes`, `estimatedWaitMinutes`, `canUndo`, `isOnBreak`, `lastCallTimestamp`, `consultDurations`, `lastUpdated` |
 
-Full sequence diagrams (including reconnect flow and idempotency retry flow): [`docs/SOCKET_EVENTS.md`](docs/SOCKET_EVENTS.md)
+Full sequence diagrams: [`docs/SOCKET_EVENTS.md`](docs/SOCKET_EVENTS.md)
 
 ---
 
@@ -207,42 +246,37 @@ cd server && node test/verify.js
 ```
 queue-cure-26/
 ├── client/
-│   └── src/
-│       ├── pages/
-│       │   ├── ReceptionistView.jsx    # Receptionist Console UI
-│       │   └── PatientDisplayView.jsx  # Patient Waiting-Room Display
-│       ├── components/
-│       │   ├── ConnectionStatus.jsx    # ECG heartbeat indicator
-│       │   ├── QueueList.jsx           # Waiting list with animated chips
-│       │   └── Toast.jsx               # Action confirmation banner
-│       ├── hooks/
-│       │   └── useQueueSocket.js       # All socket emit/listen logic
-│       ├── lib/
-│       │   ├── socket.js               # Singleton with auto-requestSync on connect
-│       │   └── i18n.js                 # English/Hindi string dictionary
-│       └── index.css                   # Clay design system (CSS variables + animations)
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── ReceptionistView.jsx    # Receptionist Console UI
+│   │   │   └── PatientDisplayView.jsx  # Patient Waiting-Room Display
+│   │   ├── components/
+│   │   │   ├── ConnectionStatus.jsx    # ECG heartbeat indicator
+│   │   │   ├── QueueList.jsx           # Waiting list with animated chips
+│   │   │   └── Toast.jsx               # Action confirmation banner
+│   │   ├── hooks/
+│   │   │   └── useQueueSocket.js       # All socket emit/listen logic
+│   │   ├── lib/
+│   │   │   ├── socket.js               # Singleton with auto-requestSync
+│   │   │   └── i18n.js                 # English/Hindi string dictionary
+│   │   ├── App.jsx                     # React Router (/ and /display)
+│   │   ├── main.jsx                    # Entry point
+│   │   └── index.css                   # Dark clinical design system
+│   ├── vercel.json                     # SPA rewrite rules for Vercel
+│   └── .env.production                 # Production backend URL
 ├── server/
-│   └── src/
-│       ├── index.js                    # Express + Socket.io setup
-│       ├── queueStore.js               # ← All state lives here
-│       └── socketHandlers.js           # Event → mutation → broadcast
+│   ├── src/
+│   │   ├── index.js                    # Express + Socket.io setup
+│   │   ├── queueStore.js               # ← All state lives here
+│   │   └── socketHandlers.js           # Event → mutation → broadcast
 │   └── test/
-│       └── verify.js                   # Automated socket test suite (5 scenarios)
-└── docs/
-    ├── SOCKET_EVENTS.md                # Mermaid sequence diagrams + event table
-    └── THOUGHT_PROCESS.md              # Design decisions, constraints, edge cases
+│       └── verify.js                   # Automated socket test suite
+├── docs/
+│   ├── SOCKET_EVENTS.md                # Mermaid sequence diagrams + event table
+│   └── THOUGHT_PROCESS.md              # Design decisions and constraints
+├── render.yaml                         # Render deployment config
+└── .gitignore
 ```
-
----
-
-## UI Design System
-
-The interface uses a **Claymorphism** design language — soft, 3D clay-like elements with multi-layer shadow stacks — adapted for a healthcare context:
-
-- **Receptionist Console:** Light lavender canvas (`#F4F1FA`), frosted glass cards (`rgba(255,255,255,0.75)` + `backdrop-filter: blur`), teal primary actions, animated ambient gradient blobs
-- **Patient Display:** Dark cinematic theme for TV mounting, large glanceable token number, ambient atmospheric glow, English/Hindi language toggle
-
-Every card uses a 4-layer shadow stack (ambient drop + top-left highlight + inner bounce light + inner rim) for physical depth. Buttons have active-press animations (`scale(0.95)` + inset shadows). The ECG heartbeat connection indicator animates while the WebSocket is live.
 
 ---
 
@@ -253,7 +287,8 @@ See [`docs/THOUGHT_PROCESS.md`](docs/THOUGHT_PROCESS.md) for the full reasoning.
 - **Server-authoritative state** over client-computed state — one truth, no optimistic updates that the server might disagree with
 - **In-memory state** over a database — persistence is out of scope; the rubric tests real-time correctness, not data durability
 - **Rolling 5-entry window** over a full-day average — responsive to pace changes (morning rush vs. afternoon slowdown) without being volatile from one outlier
-- **No QR codes / voice TTS / SMS** — each depends on hardware, audio permissions, or a third-party API. For a clinic's real-time queue, bulletproof sync matters more than feature breadth that adds demo-day failure risk
+- **Dark clinical theme** over generic light/dark mode — purpose-built for wall-mounted clinic displays where glanceable contrast matters
+- **Inline confirmation** over `window.confirm()` — browser dialogs are silently blocked in many iframe/preview environments; the inline UI works everywhere
 
 ---
 
@@ -265,9 +300,9 @@ These are scoped out by design, not by running out of time:
 - **Per-patient estimated wait** — a `/status/:tokenId` mobile view so each patient can check their own position on their phone
 - **SMS/WhatsApp notification** — alert patients when they're 2–3 positions away (Twilio or WhatsApp Business API)
 - **Persistent storage** — swap the in-memory state for SQLite or PostgreSQL; the `queueStore` interface doesn't change, only its backing store
-- **Daily analytics** — patients served per hour, average consultation duration, peak-load periods; the raw data (consultation timestamps) is already being captured
+- **Daily analytics** — patients served per hour, average consultation duration, peak-load periods; the raw data is already being captured
 
 ---
 
-*Built for Queue Cure '26 — Wooble Hackathon*
-*GitHub: [@tanmay-7706](https://github.com/tanmay-7706)*
+<p align="center"><em>Built for Queue Cure '26 — Wooble Hackathon</em></p>
+<p align="center"><em>GitHub: <a href="https://github.com/tanmay-7706">@tanmay-7706</a></em></p>
